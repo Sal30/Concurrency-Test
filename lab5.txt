@@ -1,0 +1,7 @@
+Advantages
+Simplifies concurrent execution throughout the program
+We can avoid issues with concurrent programming, e.g. deadlocks
+
+Disadvantages
+May take longer as you have to run run expensive operations many times in case of conflicts
+Still have to worry about priority
