@@ -1,15 +1,18 @@
 public class Book {
     private String name;
     private boolean isDummy;
-    Book(String name){
+
+    Book(String name) {
         this.name = name;
         if (name != "") isDummy = false;
         else isDummy = true;
     }
-    Book(){
+
+    Book() {
         this.name = "";
-        this.isDummy= true;
+        this.isDummy = true;
     }
+
     public String getName() {
         return name;
     }
