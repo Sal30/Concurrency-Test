@@ -1,53 +1,46 @@
+import org.multiverse.api.StmUtils;
+import org.multiverse.api.references.TxnInteger;
+
 public class Shelf {
     private Book[] bookArray;
-    private int capacity;
-    private int id;
+    private TxnInteger capacity;
+    private TxnInteger id;
 
-    public boolean isTaken() {
-        return isTaken;
-    }
-
-    public void setTaken(boolean taken) {
-        isTaken = taken;
-    }
-
-    private boolean isTaken;
-    Shelf(int capacity, int id){
-        this.id = id;
-        this.capacity = capacity;
-        bookArray = new Book[capacity];
+    Shelf(int firstCap, int firstId) {
+        id = StmUtils.newTxnInteger(firstId);
+        capacity = StmUtils.newTxnInteger(firstCap);
+        bookArray = new Book[capacity.atomicGet()];
         Book book = bookArray[0];
-        for(int i=0; i<capacity; i++)
-            bookArray[i] = new Book();
-        this.isTaken = false;
+        for(int i=0; i<capacity.atomicGet(); i++){
+                bookArray[i] = new Book();
     }
+        }
     public int getCapacity(){
-        return capacity;
+        return capacity.atomicGet();
     }
     public int getId(){
-        return id;
+        return id.atomicGet();
     }
-    public synchronized void acquire()
-            throws InterruptedException{
-        while (isTaken) wait();
-        isTaken = true;
-        notifyAll();
-    }
-    public synchronized void release(){
-        isTaken = false;
-        notifyAll();
-    }
+
     public Book getBookAtIndex(int index){
         return bookArray[index];
     }
     public void setBookAtIndex(int index, Book book){
         bookArray[index] = book;
     }
-    public synchronized void swap(Shelf other, int originIndex,
+    public void swap(Shelf other, int originIndex,
                                   int destIndex){
-        Book origin = getBookAtIndex(originIndex);
-        Book dest = other.getBookAtIndex(destIndex);
-        setBookAtIndex(originIndex, dest);
-        other.setBookAtIndex(destIndex, origin);
+        TxnInteger originIn = StmUtils.newTxnInteger(originIndex);
+        TxnInteger destIn = StmUtils.newTxnInteger(destIndex);
+        Book origin = getBookAtIndex(originIn.atomicGet());
+        Book dest = other.getBookAtIndex(destIn.atomicGet());
+        setBookAtIndex(originIn.atomicGet(), dest);
+        other.setBookAtIndex(destIn.atomicGet(), origin);
     }
+    public void atomicSwap(Shelf other, int origin, int dest){
+        StmUtils.atomic(() -> {
+            swap(other, origin, dest);
+        });
+    }
+
 }
